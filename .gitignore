@@ -1,0 +1,5 @@
+out
+llama2.c-stories15M
+run
+stories*
+__pycache__

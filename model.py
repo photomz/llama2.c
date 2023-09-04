@@ -23,6 +23,12 @@ class ModelArgs:
     max_seq_len: int = 2048
     dropout: float = 0.0
 
+    def __post_init__(self):
+        if not self.hidden_dim:
+            h = int(8 * self.dim / 3)
+            h = self.multiple_of * ((h + self.multiple_of - 1) // self.multiple_of)
+            self.hidden_dim = h
+
 
 class RMSNorm(torch.nn.Module):
     def __init__(self, dim: int, eps: float):
@@ -167,10 +173,7 @@ class Attention(nn.Module):
 class FeedForward(nn.Module):
     def __init__(self, dim: int, hidden_dim: int, multiple_of: int, dropout: float):
         super().__init__()
-        if hidden_dim is None:
-            hidden_dim = 4 * dim
-            hidden_dim = int(2 * hidden_dim / 3)
-            hidden_dim = multiple_of * ((hidden_dim + multiple_of - 1) // multiple_of)
+        assert hidden_dim, "hidden_dim must be set"
         self.w1 = nn.Linear(dim, hidden_dim, bias=False)
         self.w2 = nn.Linear(hidden_dim, dim, bias=False)
         self.w3 = nn.Linear(dim, hidden_dim, bias=False)
